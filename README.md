@@ -1,8 +1,9 @@
 Node-Resful-Api
 ===============
+
 ##What is REST?
 **REST** (Representational State Transfer) is an architecture style for designing networked applications. It Relies on Stateless, Client-Server, Cacheable Communicationjs Protocol and is Most often done so over HTTP.
-It allows CRUD (Create, Read, Update & Delete) Operations over HTTP Requests using `POST`, `GET` &, `DELETE`.
+It allows CRUD (Create, Read, Update & Delete) Operations over HTTP Requests using  `GET`, `POST`, `PUT` &, `DELETE`.
 REST allows applications to retrieve a resource using a URL for example:
 
 Yahoo's weather API allows us to get a XML Resource containing the forcast for a location,  <a href="http://weather.yahooapis.com/forecastrss?w=560743&u=c">http://weather.yahooapis.com/forecastrss?w=560743&u=c</a> allows us to get the forcast for Dublin, Ireland with Tempature in Degrees Celcius.
@@ -21,6 +22,7 @@ npm install express --save
 // installs path, a module containing utilities for dealing with file paths
 npm install path --save
 ```
+
 Now create a `server.js` file in the main project directory and add the following
 
 create server.js and code most basic server
@@ -45,34 +47,29 @@ app.listen(1234, function(){
 BAM! There you have it, a very simple RESTful service.Run it with the command
 ```bash
 node server.js
-`
-Now try testing with [Postman]()
-[]
+```
+Now try testing with [Postman](http://www.getpostman.com/)
+![Postman Screen Shot](https://raw.githubusercontent.com/jonniedarko/Node-Resful-Api/master/screenshots/Postman%20screen%20shot%201.jpg)
+
+[Code so far](https://github.com/jonniedarko/Node-Resful-Api/commit/5b12f157674625d7d05a954c7a7e81122304c017)
 
 Note we also went a small step further then the scope of the project with the line
 ```js
 app.use(express.static(path.join(__dirname, "public")));
 ```
-All this does is allows use to server static files from a public directory, so as well as creating a very basic RESTful service we also created a very basic File Server.
+All this does is allows use to server static files from a public directory, so as well as creating a very basic RESTful service we also created a very basic File Server. All we need to do is create our *"public"*
 
-Now that we can serve from a public directory we can add static content in our public directory
-If you want to continue with front end dev you can install  bower for front end dependencie (npm of the front end).
-`npm install bower --save`
-We can define where our bower dependences are installed inside a `.bowerrc` with a path
-```json
-{
-    "location" : "public/js/vendor"
-}
-```
-Give it a go, save a basic HTML Page into the public directory and point your browser to the<a href="http://localhost:1234">localhost on port 1234</a> and you sould retrieve the HTML page in the public directory. Then add `/api` the url and you should see a simple test output saying `BAM! you got a response`
+Now that we can serve from a public directory we can add static content in our public directory. Give it a go, save a basic HTML Page into the public directory and point your browser to the<a href="http://localhost:1234">localhost on port 1234</a> and you sould retrieve the HTML page in the public directory.
 
-We will touch on this more in future  when we want to combine our server-side and Front end into a fullstack app. For now I won't be covering anymore front end for this post.
-
-
+If you want to continue with front end dev you can create your static *HTML*, *JS* and *CSS* here, you could even install  bower(npm of the front end) but we'll touch on this more in the future when we want to combine our server-side and Front end into a fullstack app. For now I won't be covering anymore front end for this post.
 
 Back to the server-Side
 
-We want to create a barebones CRUD api, so first we need another module, expresses `method-override` module, which lets us use HTTP verbs such as PUT or DELETE in places where the client doesn't support it **NOTE:** It is very important that this module is used before any module that needs to know the method of the request, otherwise it could cause issues which may be difficult to track down. So lets install it:
+We want to create a barebones CRUD api, so first we need another module, expresses *"method-override"* module, which lets us use HTTP verbs such as PUT or DELETE in places where the client doesn't support it
+
+_**NOTE:** It is very important that this module is used before any module that needs to know the method of the request, otherwise it could cause issues which may be difficult to track down._
+
+So lets install it:
 ```bash
     npm install method-override --save
 ```
@@ -85,6 +82,7 @@ app.use(methodOverride());
 ```
 
 No we can simulate DELETE and PUT, so lets add some Endpoints to our REST Api. Add the following just before the `app.listen(...)`
+
 ```js
 app.get('/api/user', function(request, response) {
     response.send('This is not implemented now');
@@ -106,71 +104,134 @@ app.delete('/api/user/:id', function (request, response){
     response.send('This is not implemented now');
 });
 ```
+
 What we have done here is create a Skeleton for:
 1 - `GET`ting all users @ `/api/user`
 2 - `POST`ing or Persisting/Saving a new user to same URL
 3 - `GET`ting a user of a particular `id` @ `/api/user/:id` e.g. `/api/user/12345`
-4 - 'PUT'ting or updating a particular user @ the same URL
-5 - 'DELETE' a particular User
+4 - `PUT`ting or updating a particular user @ the same URL
+5 - `DELETE` a particular User
 
 BUT.....before we can take the next step with our restfull api we need to set up where and how our data is stored. This is where [MongoDB](http://www.mongodb.org/) & [Mongoose.js](http://mongoosejs.com) come into play..
 
-Firstly make sure you have MongoDB installed(Installers are available[here](http://www.mongodb.org/downloads), I Personally used [Homebrew to install](http://docs.mongodb.org/manual/tutorial/install-mongodb-on-os-x/)) and running. Once installed you can usually start by running the command `mongod`.
+Firstly make sure you have MongoDB installed and running (Installers are available[here](http://www.mongodb.org/downloads), I Personally used [Homebrew to install](http://docs.mongodb.org/manual/tutorial/install-mongodb-on-os-x/)). Once installed you can usually start by running the command `mongod`.
 
 Next install the Node Mongodb module as well as the Mongoose.js module
 ```bash
 npm install mongoose --save
 ```
-Rather then make our Server overly complex and confusing then it needs to be, lets create a CRUD module to store our database interaction. Create a new folder called lib and a new javascript file "user-crud.js"
+Rather then make our Server overly complex and confusing then it needs to be, lets create a CRUD module to store our database interaction. Create two new folders, called lib and config. Inside config create a new javascript file *"db.config.js"* to hold our DB configuration.
 
 So lets get a connection to mongodb going...
 
 ```js
-var mongoose = require('mongoose');
+module.exports = function () {
+    var mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost:27017/crudusers');
+    mongoose.connect('mongodb://localhost:27017/crudusers');
 
-var db = mongoose.connection;
+    var db = mongoose.connection;
 
-db.on('error', function(error){
-    console.log("connection error: "+error.message);
-});
+    db.on('error', function(error){
+        console.log("connection error: "+error.message);
+    });
 
-db.once('open', function(){
-    console.log("Connected successfull!")
-});
+    db.once('open', function(){
+        console.log("Connected successfull!")
+    });
+}
 ```
+
+And *require* our configuration in our *"server.js"* file.
+```js
+// Add the following after requiring the "path" module
+require("./config/db.config")();
+```
+
 Now if we run `node server.js` you should get the following output:
+
 ```bash
 Our First Express/Node Server listening on port 1234
 Connected successfull!
 ```
+
 If you are getting `connection error: failed to connect to [localhost:27017]` then you most likely forgot to start Mongodb.
 
-Next we want to create a Schema and from that a Model which we can export to use in our serve routes:
+Next we want to create a Schema and from that a Model which we can export to use in our serve routes. So inside our lib folder create *"user.model.js"* and add the following:
 
 ```js
+var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-
 var User = new Schema({
     firstname: { type: String, required: true},
     surname:  { type: String, required: true},
     username: { type: String, required: true},
     password: { type: String, required: true}
 });
-
 var UserModel = mongoose.model("User", User);
 
 module.exports.UserModel = UserModel;
+```
+
+In order to use this model we need to import the module but before we doe this ltest clean up our code base by moving our routes from *"server.js"* to a new file. Create a new file called *"rest.routes.js"* inside the *"lib"* folder. What we are going to do is return a function that accepts our Express "app" as a parameter.
+
+```js
+// rest.routes.js
+module.exports = function(app){
+    app.get('/api', function(request, response){
+        response.send('BAM! you got a response');
+    });
+
+    app.get('/api/user', function(request, response) {
+        response.send('This is not implemented now');
+    });
+
+    app.post('/api/user', function(request, response) {
+        response.send('This is not implemented now');
+    });
+
+    app.get('/api/user/:id', function(request, response) {
+        response.send('This is not implemented now');
+    });
+
+    app.put('/api/user/:id', function (request, response){
+        response.send('This is not implemented now');
+    });
+
+    app.delete('/api/user/:id', function (request, response){
+        response.send('This is not implemented now');
+    });
+}
 
 ```
 
-Now in order to use this model we need to import it into out `server.js`.
+And our *"server.js"* should look like the following
 
 ```js
-//include after our other "required" modules
-var UserModel    = require('./lib/user-crud').UserModel;
-````
+var express = require('express');
+var methodOverride = require('method-override');
+var path = require('path');
+var restRoutes = require('./lib/rest.routes.js');
+require('./config/db.config')();
+
+var app = express();
+app.use(express.static(path.join(__dirname, "public")));
+app.use(methodOverride());
+
+// Include our routes from "rest.routes.js"
+restRoutes(app);
+
+app.listen(1234, function(){
+    console.log('Our First Express/Node Server listening on port 1234');
+});
+```
+
+Now Lets make use of our Model by importing into our rest routes module.
+
+```js
+var UserModel    = require('./user.model').UserModel;
+```
+
 And now we update our routes, lets start with the `POST` method so we can actually create data. Replace out post method with the following
 
 ```js
@@ -196,14 +257,28 @@ app.post('/api/user', function (request, response) {
 
 Now if you try to post to this you may run into a few issues like "firstname not defined" and if you debug it you will probably find the same is true for request.body....
 
-This is because we need to include the express [body-parser](https://github.com/expressjs/body-parser), in Express 4 we do this by requireing it and including the following with the rest of our configuration:
+This is because we need to include the express [body-parser](https://github.com/expressjs/body-parser), in Express 4 we do this by requiring it and including the following with the rest of our configuration:
+
+Install
+
+```bash
+npm install body-parser --save
+```
+
+and include & use in our *"server.js"*
+
 ```js
+var bodyParser = require('body-parser');
+
+......
+
 app.use(bodyParser.urlencoded({extended: true}))
 ```
+
 this allows us to parse application/x-www-form-urlencoded paramaters, the extended true allows us to extended parse syntax with the [qs module](https://github.com/visionmedia/node-querystring)
 
-In order to test I am using [Postman](http://www.getpostman.com/). In postman we setup a request up as shown below
-[SCREENSHOT HERE]
+In postman we setup a request up as shown below
+![POSTing a new User](https://raw.githubusercontent.com/jonniedarko/Node-Resful-Api/master/screenshots/Postman%20screen%20shot%202.jpg)
 
 
 Now lets set up our method to get all users, update a user and delete a user:

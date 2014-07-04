@@ -26,6 +26,9 @@
   "homepage": "https://github.com/jonniedarko/Node-Resful-Api",
   "dependencies": {
     "path": "~0.4.9",
-    "express": "~4.4.5"
+    "express": "~4.4.5",
+    "method-override": "~2.0.2",
+    "mongoose": "~3.8.12",
+    "body-parser": "~1.4.3"
   }
 }
