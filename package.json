@@ -1,0 +1,31 @@
+{
+  "name": "Node-Restful-Api",
+  "version": "0.0.0",
+  "description": "Basic Restful API Setup for Node using Express, mongoose and MongoDB ",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jonniedarko/Node-Resful-Api.git"
+  },
+  "keywords": [
+    "Node",
+    "Rest",
+    "Express",
+    "Mongoose",
+    "MongoDB",
+    "jonnie.io"
+  ],
+  "author": "John Maguire",
+  "license": "none",
+  "bugs": {
+    "url": "https://github.com/jonniedarko/Node-Resful-Api/issues"
+  },
+  "homepage": "https://github.com/jonniedarko/Node-Resful-Api",
+  "dependencies": {
+    "path": "~0.4.9",
+    "express": "~4.4.5"
+  }
+}
