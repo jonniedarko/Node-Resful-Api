@@ -280,13 +280,31 @@ this allows us to parse application/x-www-form-urlencoded paramaters, the extend
 In postman we setup a request up as shown below
 ![POSTing a new User](https://raw.githubusercontent.com/jonniedarko/Node-Resful-Api/master/screenshots/Postman%20screen%20shot%202.jpg)
 
+[Code so far](https://github.com/jonniedarko/Node-Resful-Api/commit/364bb87393fa0bd4bb16cd1e139259506336b197)
 
-Now lets set up our method to get all users, update a user and delete a user:
+Now lets set up our routes to get all users, update a user and delete a user:
+
 ```js
 app.get('/api/user', function (request, response) {
     return UserModel.find(function (error, users) {
         if (!error) {
             return response.send(users);
+        } else {
+            response.statusCode = 500;
+            console.log('Internal error(%d): %s',response.statusCode,error.message);
+            return response.send({ error: 'Server error' });
+        }
+    });
+});
+
+app.get('/api/user/:id', function (request, response) {
+    return UserModel.findById(request.params.id, function (error, user) {
+        if(!user) {
+            response.statusCode = 404;
+            return response.send({ error: 'Not found' });
+        }
+        if (!error) {
+            return response.send({ status: 'OK', user:user });
         } else {
             response.statusCode = 500;
             console.log('Internal error(%d): %s',response.statusCode,error.message);
