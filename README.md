@@ -367,6 +367,7 @@ And there you go, your first restfull API... its pretty simple but also lacking 
 
 ***
 
+
 Node Restful Api Part 2 - Validation and Securing Passwords
 =============================================
 This Post Continues on from the [pervious post](http://blog.jonnie.io/creating-a-restful-api-with-node-js/) with the code continuing on from [this commit](https://github.com/jonniedarko/Node-Resful-Api/commit/1abb749e572aaf2536c942a43026fb2acc9c7e28). We currently have a simple RESTful service to create, delete and update users, but right now we are not enforcing any rules as to what can be submitted. One of the most important steps in making any service secure and trustworthy is Validation. This could mean making sure usernames are unique, only contain certain characters or passwords are long enough and not a regular insecure password like  "password" or "test".
@@ -429,7 +430,7 @@ What about SQL injection?
 Dollar Sign Operator Escaping
 >Field names in MongoDB’s query language have semantic meaning. The dollar sign (i.e $) is a reserved character used to represent operators (i.e. $inc.) Thus, you should ensure that your application’s users cannot inject operators into their inputs.
 
-So While we may not need to worry about SQL injection, we do need to consider the `$` issue. There are many ways to approach this for example sawpping it for it's unicode character but we're gona be lazy and just reject any values that ask for it. Our username and password already do this as they do not allow characters outside of Alpha Numerical. We could apply this current validation to the first and second name but for the hell of it we'll create a new method. Add the following to our Validation.js file:
+So While we may not need to worry about SQL injection, we do need to consider the `$` issue. There are many ways to approach this for example sawpping it for it's unicode character but we're gona be lazy and just reject any values that ask for it. Our username and password already do this as they do not allow characters outside of Alpha Numerical. We could apply this current validation to the first and second name but for the hell of it we'll create a new method. Add the following to our *"user.validation.js"* file:
 
 ```js
 isSafe: function (input)
@@ -438,6 +439,8 @@ isSafe: function (input)
         return !regex.test(input);
     }
 ```
+
+As mentioned above all this does is return false if the input contains `$` and true otherwise. So now we just need to add our path methods as part of our user model:
 
 Now inside our User model module we can import this module and using Mongoose's Schema we can attach validations method using `path()`. These are methods that are called before adding to the Database, if they fail then they are not persisted to the Database. So lets incorperate the above methods into our Schema validation:
 
@@ -454,29 +457,7 @@ User.path('password').validate(function (input){
 ```
 
 
-
-```js
-
-    ,isSafe: function (input)
-    {
-        var re = /([$])/;
-        return !re.test(input);
-    }
-
-```
-
-All this does is return false if the input contains `$` and true otherwise. So now we just need to add our path methods inside user-crud.js:
-
-```js
-User.path('firstname').validate(function (input){
-    return validate.isSafe(input);
-});
-User.path('surname').validate(function (input){
-    return validate.isSafe(input);
-});
-```
-
-and boom! Now we can feel a little more confident in our stored data. One Final change you can make is to return a more meaningfull error. This is as 
+And boom! Now we can feel a little more confident in our stored data. One Final change you can make is to return a more meaningfull error. This is as 
 simple as including an extra string variable in the Validate Method:
 
 ```js
@@ -503,13 +484,3 @@ Here's what is should look like in Postman
 [Code to this point](https://github.com/jonniedarko/Node-Resful-Api/commit/171b160cd785de1327749f247c9c0f9d5d5de8af)
 
 Not so difficult eh? In the Next post we will deal with Encryption....Too many Companies are in hot water these days because they are storing sensitive information in plane text. I will show you how to apply basic encrytion to fields in out Database.
-
-
-<div style="display:none">
-Sources
-- http://aleksandrov.ws/2013/09/12/restful-api-with-nodejs-plus-mongodb/
-- http://scotch.io/bar-talk/expressjs-4-0-new-features-and-upgrading-from-3-0
-- https://github.com/expressjs/method-override
-- http://thewayofcode.wordpress.com/2013/04/21/how-to-build-and-test-rest-api-with-nodejs-express-mocha/
-</div>
-
